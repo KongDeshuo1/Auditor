@@ -1,5 +1,6 @@
 inventory = 0 
 failed_entries = 0
+pass_entries - 0
 
 print("Inventory Auditor")
 print("Enter stock item quantity, or type 'quit' to exit.")

@@ -1,7 +1,7 @@
 inventory = 0 
 failed_entries = 0
 
-print("Inventory Auditor")
+print("Inventory Management System")
 print("Enter stock item quantity, or type 'quit' to exit.")
 
 while True:

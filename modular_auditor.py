@@ -1,38 +1,52 @@
-inventory = 0 
-failed_entries = 0
 
-print("Inventory Management System")
-print("Enter stock item quantity, or type 'quit' to exit.")
-
-while True:
-    entry = input("Enter stock item quantity: ")
-
-    if entry.lower() == "quit":
-        break
+def get_valid_input():
+    entry = input("Enter stock item quantity or type 'quit' to ")
 
     if not entry.isdigit():
         print("Invalid entry. Please enter a valid quantity.")
+        return None
+    if entry == "quit":
+        return "quit"
+
+    return int(entry)
+
+def process_delivery(current_total, new_value):
+    return current_total + new_value
+
+def calculate_tax(amount):
+    tax_rate = 0.10
+    return amount * tax_rate
+
+def generate_report(total_units, failed_attempts):
+    print("Total inventory:", total_units)
+    print("Failed entries:", failed_attempts)
+
+inventory = 0 
+failed_entries = 0
+deliveries_processed = 0
+
+while True:
+    entry = get_valid_input()
+
+    if entry == "quit":
+        break
+    
+    if entry is None:
         failed_entries += 1
         continue
 
-    quantity = int(entry)
+    inventory = process_delivery(inventory, entry)
 
-    if quantity < 0:
-        print("Please input a positive number.")
-        failed_entries += 1
-        continue
-    inventory += quantity
+    tax = calculate_tax(entry)
 
     print(f"Current inventory: {inventory}")
+    print(f"Tax for this entry: {tax}")
 
     if inventory > 500:
         print("Stock limit exceeded!")
         break
-    else:
-        pass
 
-print("Total inventory:", inventory)
-print("Failed entries:", failed_entries)
+generate_report(deliveries_processed, failed_entries)
 
 
 

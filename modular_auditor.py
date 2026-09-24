@@ -2,12 +2,14 @@
 def get_valid_input():
     entry = input("Enter stock item quantity or type 'quit' to ")
 
+    if entry == "quit": 
+            return "quit"
+
     if not entry.isdigit():
         print("Invalid entry. Please enter a valid quantity.")
         return None
-    if entry == "quit":
-        return "quit"
 
+    
     return int(entry)
 
 def process_delivery(current_total, new_value):
@@ -28,8 +30,7 @@ deliveries_processed = 0
 while True:
     entry = get_valid_input()
 
-    if entry == "quit":
-        break
+    if entry == "quit": break
     
     if entry is None:
         failed_entries += 1
@@ -46,7 +47,7 @@ while True:
         print("Stock limit exceeded!")
         break
 
-generate_report(deliveries_processed, failed_entries)
+generate_report(inventory, failed_entries)
 
 
 

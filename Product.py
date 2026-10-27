@@ -1,3 +1,7 @@
+import json
+
+INVENTORY_FILE = "inventory.json"
+
 class Product:
     def __init__(self, product_id, name, price, stock):
         self.__product_id = product_id
@@ -21,6 +25,15 @@ class Product:
         print(f"Name: {self.__name}")
         print(f"Price: ${self.__price:.2f}")
         print(f"Stock: {self.__stock}")
+
+    def to_dict(self):
+        
+        return {
+            "id": self.__product_id,
+            "name": self.__name,
+            "price": self.__price,
+            "stock": self.__stock
+        }
 
 
 
@@ -51,14 +64,65 @@ class Inventory:
             product.display_information()
             print("-" * 30)
 
-def main():
+    def to_list(self):
+        data = []
+
+        for product in self.__products:
+            data.append(product.to_dict())
+
+        return data
+
+
+def save_inventory(inventory):
+    with open(INVENTORY_FILE, "w") as file:
+        json.dump(inventory.to_list(), file, indent=4)
+
+    print("Inventory saved successfully.")
+
+
+def load_inventory():
     inventory = Inventory()
+
+    try:
+        with open(INVENTORY_FILE, "r") as file:
+            data = json.load(file)
+
+    except FileNotFoundError:
+        print("No saved inventory found. Starting with an empty inventory.")
+        return inventory
+
+    for item in data:
+        product = Product(
+            item["id"],
+            item["name"],
+            item["price"],
+            item["stock"]
+        )
+
+        inventory.add_product(product)
+
+    print("Inventory loaded successfully.")
+    return inventory
+
+def main():
+
+    try:
+        inventory = load_inventory()
+
+    except (OSError, ValueError, KeyError, TypeError) as error:
+        print(f"Unable to load inventory: {error}")
+        print("Check inventory.json before running again.")
+        return
+
+    
 
     while True:
         print("\n----------- MENU -----------")
         print("1. Display All Products")
         print("2. Add Product")
+        print("3. Update Stock")
         print("4. Search Product")
+        print("5. Save Inventory")
         print("6. Exit")
         print("----------------------------")
 
@@ -103,6 +167,26 @@ def main():
             product = Product(product_id, name, price, stock)
             inventory.add_product(product)
 
+        elif option == "3":
+            product_id = input("Enter Product ID: ").strip().upper()
+            product = inventory.search_product(product_id)
+
+            if product is None:
+                print("Product not found.")
+                continue
+
+            product.display_information()
+            print("Enter the new total stock quantity.")
+
+            try:
+                quantity = int(input("Stock Quantity: "))
+
+            except ValueError:
+                print("Stock must be a whole number.")
+                continue
+
+            product.update_stock(quantity)
+
         elif option == "4":
             product_id = input("Enter Product ID: ").strip().upper()
             product = inventory.search_product(product_id)
@@ -111,13 +195,28 @@ def main():
                 print("Product not found.")
             else:
                 product.display_information()
+        
+        elif option == "5":
+            try:
+                save_inventory(inventory)
+
+            except OSError as error:
+                print(f"Unable to save inventory: {error}")
 
         elif option == "6":
+            try:
+                save_inventory(inventory)
+
+            except OSError as error:
+                print(f"Unable to save inventory: {error}")
+                print("Your changes are still in memory. Please try again.")
+                continue
+
             print("Thank you for using Inventory Management System.")
             break
 
         else:
-            print("Invalid option. Please enter 1, 4 or 6.")
+            print("Invalid option. Please enter 1 to 6.")
 
 
 if __name__ == "__main__":

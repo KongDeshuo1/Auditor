@@ -57,6 +57,7 @@ def main():
     while True:
         print("\n----------- MENU -----------")
         print("1. Display All Products")
+        print("2. Add Product")
         print("4. Search Product")
         print("6. Exit")
         print("----------------------------")
@@ -65,6 +66,42 @@ def main():
 
         if option == "1":
             inventory.display_all()
+
+        elif option == "2":
+            product_id = input("Product ID: ").strip().upper()
+
+            if product_id == "":
+                print("Product ID cannot be empty.")
+                continue
+
+            if inventory.search_product(product_id) is not None:
+                print("Product ID already exists.")
+                continue
+
+            name = input("Product Name: ").strip()
+
+            if name == "":
+                print("Product name cannot be empty.")
+                continue
+
+            try:
+                price = float(input("Price: "))
+                stock = int(input("Stock Quantity: "))
+
+            except ValueError:
+                print("Enter a number for price and a whole number for stock.")
+                continue
+
+            if not (0 <= price < float("inf")):
+                print("Price must be a finite number of 0 or more.")
+                continue
+
+            if stock < 0:
+                print("Stock cannot be negative.")
+                continue
+
+            product = Product(product_id, name, price, stock)
+            inventory.add_product(product)
 
         elif option == "4":
             product_id = input("Enter Product ID: ").strip().upper()

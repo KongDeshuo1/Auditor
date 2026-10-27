@@ -51,15 +51,39 @@ class Inventory:
             product.display_information()
             print("-" * 30)
 
+def main():
+    inventory = Inventory()
 
-inventory = Inventory()
+    while True:
+        print("\n----------- MENU -----------")
+        print("1. Display All Products")
+        print("4. Search Product")
+        print("6. Exit")
+        print("----------------------------")
 
-product1 = Product("P001", "Laptop", 1200.00, 15)
-product2 = Product("P002", "Mouse", 25.50, 40)
+        option = input("Enter option: ").strip()
 
-inventory.add_product(product1)
-inventory.add_product(product2)
+        if option == "1":
+            inventory.display_all()
 
-inventory.display_all()
+        elif option == "4":
+            product_id = input("Enter Product ID: ").strip().upper()
+            product = inventory.search_product(product_id)
+
+            if product is None:
+                print("Product not found.")
+            else:
+                product.display_information()
+
+        elif option == "6":
+            print("Thank you for using Inventory Management System.")
+            break
+
+        else:
+            print("Invalid option. Please enter 1, 4 or 6.")
+
+
+if __name__ == "__main__":
+    main()
 
     

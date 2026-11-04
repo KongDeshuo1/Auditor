@@ -1,5 +1,7 @@
-from Product import Product
+from PhysicalProduct import PhysicalProduct
+from DigitalProduct import DigitalProduct
 from file_handler import load_inventory, save_inventory
+
 
 
 def main():
@@ -61,9 +63,52 @@ def main():
             if stock < 0:
                 print("Stock cannot be negative.")
                 continue
+            
+            print("\nProduct Type")
+            print("1. Physical Product")
+            print("2. Digital Product")
 
-            product = Product(product_id, name, price, stock)
+            product_type = input("Choose product type: ").strip()
+
+            if product_type == "1":
+                try:
+                    weight = float(input("Weight (kg): "))
+
+                except ValueError:
+                    print("Weight must be a number.")
+                    continue
+
+                if not (0 < weight < float("inf")):
+                    print("Weight must be a finite number greater than 0.")
+                    continue
+
+                product = PhysicalProduct(
+                    product_id, name, price, stock, weight
+                )
+
+            elif product_type == "2":
+                try:
+                    download_size = float(input("Download size (MB): "))
+
+                except ValueError:
+                    print("Download size must be a number.")
+                    continue
+
+                if not (0 < download_size < float("inf")):
+                    print("Download size must be a finite number greater than 0.")
+                    continue
+
+                product = DigitalProduct(
+                    product_id, name, price, stock, download_size
+                )
+
+            else:
+                print("Invalid product type. Please choose 1 or 2.")
+                continue
+
             inventory.add_product(product)
+
+            
 
         elif option == "3":
             product_id = input("Enter Product ID: ").strip().upper()

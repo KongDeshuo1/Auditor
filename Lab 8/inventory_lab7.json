@@ -1,0 +1,18 @@
+[
+    {
+        "id": "P1002",
+        "name": "Bag",
+        "price": 2213.0,
+        "stock": 2,
+        "type": "physical",
+        "weight": 2.0
+    },
+    {
+        "id": "P10003",
+        "name": "Weblink",
+        "price": 12333.0,
+        "stock": 32323,
+        "type": "digital",
+        "download_size": 100.0
+    }
+]

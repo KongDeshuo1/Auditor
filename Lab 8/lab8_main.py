@@ -1,6 +1,7 @@
 from PhysicalProduct import PhysicalProduct
 from DigitalProduct import DigitalProduct
 from file_handler import load_inventory, save_inventory
+from Supplier import Supplier
 
 
 
@@ -64,6 +65,16 @@ def main():
                 print("Stock cannot be negative.")
                 continue
             
+            supplier_id = input("Supplier ID: ").strip().upper()
+            supplier_name = input("Supplier Name: ").strip()
+            contact_email = input("Supplier Contact Email: ").strip()
+
+            if not supplier_id or not supplier_name or not contact_email:
+                print("Supplier details cannot be empty.")
+                continue
+
+            supplier = Supplier(supplier_id, supplier_name, contact_email)
+
             print("\nProduct Type")
             print("1. Physical Product")
             print("2. Digital Product")
@@ -83,7 +94,7 @@ def main():
                     continue
 
                 product = PhysicalProduct(
-                    product_id, name, price, stock, weight
+                    product_id, name, price, stock, weight, supplier
                 )
 
             elif product_type == "2":
@@ -99,7 +110,7 @@ def main():
                     continue
 
                 product = DigitalProduct(
-                    product_id, name, price, stock, download_size
+                    product_id, name, price, stock, download_size, supplier
                 )
 
             else:

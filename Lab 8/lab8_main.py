@@ -1,21 +1,20 @@
-from PhysicalProduct import PhysicalProduct
-from DigitalProduct import DigitalProduct
-from file_handler import load_inventory, save_inventory
+from ProductFactory import ProductFactory
 from Supplier import Supplier
+from file_handler import load_inventory, save_inventory
+from input_helpers import get_positive_float
+from csv_loader import load_products
+
+import csv
 
 
-
-def main():
-
+def main() -> None:
     try:
         inventory = load_inventory()
 
     except (OSError, ValueError, KeyError, TypeError) as error:
         print(f"Unable to load inventory: {error}")
-        print("Check inventory.json before running again.")
+        print("Check inventory_lab7.json before running again.")
         return
-
-    
 
     while True:
         print("\n----------- MENU -----------")
@@ -25,6 +24,7 @@ def main():
         print("4. Search Product")
         print("5. Save Inventory")
         print("6. Exit")
+        print("7. Load Products from CSV")
         print("----------------------------")
 
         option = input("Enter option: ").strip()
@@ -35,7 +35,7 @@ def main():
         elif option == "2":
             product_id = input("Product ID: ").strip().upper()
 
-            if product_id == "":
+            if not product_id:
                 print("Product ID cannot be empty.")
                 continue
 
@@ -45,26 +45,25 @@ def main():
 
             name = input("Product Name: ").strip()
 
-            if name == "":
+            if not name:
                 print("Product name cannot be empty.")
                 continue
 
-            try:
-                price = float(input("Price: "))
-                stock = int(input("Stock Quantity: "))
+            price = get_positive_float("Price: ")
 
-            except ValueError:
-                print("Enter a number for price and a whole number for stock.")
-                continue
+            while True:
+                try:
+                    stock = int(input("Stock Quantity: "))
 
-            if not (0 <= price < float("inf")):
-                print("Price must be a finite number of 0 or more.")
-                continue
+                    if stock < 0:
+                        print("Stock cannot be negative.")
+                        continue
 
-            if stock < 0:
-                print("Stock cannot be negative.")
-                continue
-            
+                    break
+
+                except ValueError:
+                    print("Stock must be a whole number.")
+
             supplier_id = input("Supplier ID: ").strip().upper()
             supplier_name = input("Supplier Name: ").strip()
             contact_email = input("Supplier Contact Email: ").strip()
@@ -79,47 +78,40 @@ def main():
             print("1. Physical Product")
             print("2. Digital Product")
 
-            product_type = input("Choose product type: ").strip()
+            choice = input("Choose product type: ").strip()
 
-            if product_type == "1":
-                try:
-                    weight = float(input("Weight (kg): "))
+            weight: float | None = None
+            download_size: float | None = None
 
-                except ValueError:
-                    print("Weight must be a number.")
-                    continue
+            if choice == "1":
+                product_type = "physical"
+                weight = get_positive_float("Weight (kg): ")
 
-                if not (0 < weight < float("inf")):
-                    print("Weight must be a finite number greater than 0.")
-                    continue
-
-                product = PhysicalProduct(
-                    product_id, name, price, stock, weight, supplier
-                )
-
-            elif product_type == "2":
-                try:
-                    download_size = float(input("Download size (MB): "))
-
-                except ValueError:
-                    print("Download size must be a number.")
-                    continue
-
-                if not (0 < download_size < float("inf")):
-                    print("Download size must be a finite number greater than 0.")
-                    continue
-
-                product = DigitalProduct(
-                    product_id, name, price, stock, download_size, supplier
-                )
+            elif choice == "2":
+                product_type = "digital"
+                download_size = get_positive_float("Download size (MB): ")
 
             else:
                 print("Invalid product type. Please choose 1 or 2.")
                 continue
 
-            inventory.add_product(product)
+            try:
+                product = ProductFactory.create(
+                    product_type=product_type,
+                    product_id=product_id,
+                    name=name,
+                    price=price,
+                    stock_quantity=stock,
+                    supplier=supplier,
+                    weight=weight,
+                    download_size=download_size
+                )
 
-            
+            except ValueError as error:
+                print(f"Unable to create product: {error}")
+                continue
+
+            inventory.add_product(product)
 
         elif option == "3":
             product_id = input("Enter Product ID: ").strip().upper()
@@ -132,14 +124,14 @@ def main():
             product.display_information()
             print("Enter the new total stock quantity.")
 
-            try:
-                quantity = int(input("Stock Quantity: "))
+            while True:
+                try:
+                    quantity = int(input("Stock Quantity: "))
+                    product.update_stock(quantity)
+                    break
 
-            except ValueError:
-                print("Stock must be a whole number.")
-                continue
-
-            product.update_stock(quantity)
+                except ValueError:
+                    print("Stock must be a whole number of 0 or more.")
 
         elif option == "4":
             product_id = input("Enter Product ID: ").strip().upper()
@@ -147,9 +139,11 @@ def main():
 
             if product is None:
                 print("Product not found.")
+
             else:
                 product.display_information()
-        
+                product.display_supplier()
+
         elif option == "5":
             try:
                 save_inventory(inventory)
@@ -169,8 +163,35 @@ def main():
             print("Thank you for using Inventory Management System.")
             break
 
+        elif option == "7":
+            path = input("CSV filename [products.csv]: ").strip()
+
+            if not path:
+                path = "products.csv"
+
+            print("Enter the supplier for the products in this file.")
+
+            supplier_id = input("Supplier ID: ").strip().upper()
+            supplier_name = input("Supplier Name: ").strip()
+            contact_email = input("Supplier Contact Email: ").strip()
+
+            if not supplier_id or not supplier_name or not contact_email:
+                print("Supplier details cannot be empty.")
+                continue
+
+            supplier = Supplier(supplier_id, supplier_name, contact_email)
+
+            try:
+                load_products(path, inventory, supplier)
+
+            except OSError as error:
+                print(f"Unable to read products file: {error}")
+
+            except (UnicodeError, csv.Error) as error:
+                print(f"Invalid CSV file: {error}")
+
         else:
-            print("Invalid option. Please enter 1 to 6.")
+            print("Invalid option. Please enter 1 to 7.")
 
 
 if __name__ == "__main__":

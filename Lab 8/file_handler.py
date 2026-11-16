@@ -1,8 +1,7 @@
 import json
 
 from Inventory import Inventory
-from PhysicalProduct import PhysicalProduct
-from DigitalProduct import DigitalProduct
+from ProductFactory import ProductFactory
 from Supplier import Supplier
 
 
@@ -38,6 +37,7 @@ def load_inventory() -> Inventory:
 
         if supplier_data is None:
             supplier = Supplier("UNKNOWN", "Not recorded", "Not recorded")
+
         else:
             if not isinstance(supplier_data, dict):
                 raise ValueError("Supplier data must be a dictionary.")
@@ -48,14 +48,16 @@ def load_inventory() -> Inventory:
                 supplier_data["contact_email"]
             )
 
-        if item["type"] == "physical":
-            product = PhysicalProduct(item["id"], item["name"], item["price"], item["stock"], item["weight"], supplier)
-
-        elif item["type"] == "digital":
-            product = DigitalProduct(item["id"], item["name"], item["price"], item["stock"], item["download_size"], supplier)
-
-        else:
-            raise ValueError(f"Unknown product type: {item['type']}")
+        product = ProductFactory.create(
+            product_type=item["type"],
+            product_id=item["id"],
+            name=item["name"],
+            price=item["price"],
+            stock_quantity=item["stock"],
+            supplier=supplier,
+            weight=item.get("weight"),
+            download_size=item.get("download_size")
+        )
 
         inventory.add_product(product)
 
